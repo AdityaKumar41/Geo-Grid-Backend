@@ -1,0 +1,75 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id            String      @id @default(uuid())
+  name          String
+  profileImage  String?
+  gender        String
+  age           Int
+  phoneNo       String
+  email         String
+  position      String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  attendances   Attendance[] // Relation field
+  adminId       String       // Foreign key to Admin
+  admin         Admin        @relation(fields: [adminId], references: [id]) // Relation field
+  AttendancePair AttendancePair[]
+}
+
+model Admin {
+  id            String       @id @default(uuid())
+  name          String
+  email         String
+  password      String
+  profileImage  String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  employees     Employee[]   // Relation field
+  attendances   Attendance[] // Relation field
+  AttendancePair AttendancePair[]
+}
+
+enum AttendanceStatus {
+  CHECKED_IN
+  CHECKED_OUT
+}
+
+model AttendancePair {
+  id          String       @id @default(uuid())
+  employeeId  String
+  adminId     String
+  date        DateTime     @map("date") // Use `@map` for compatibility with PostgreSQL reserved keywords
+  checkInId   String?      @unique
+  checkOutId  String?      @unique
+  checkIn     Attendance?  @relation("CheckInRecord", fields: [checkInId], references: [id])
+  checkOut    Attendance?  @relation("CheckOutRecord", fields: [checkOutId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  employee    Employee     @relation(fields: [employeeId], references: [id])
+  admin       Admin        @relation(fields: [adminId], references: [id])
+
+  @@unique([employeeId, date], name: "unique_employee_date") // Ensure one AttendancePair per employee per day
+}
+
+model Attendance {
+  id                String           @id @default(uuid())
+  employeeId        String
+  adminId           String
+  timestamp         DateTime         @default(now())
+  status            AttendanceStatus
+  checkInPair       AttendancePair?  @relation("CheckInRecord")
+  checkOutPair      AttendancePair?  @relation("CheckOutRecord")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  employee          Employee         @relation(fields: [employeeId], references: [id])
+  admin             Admin            @relation(fields: [adminId], references: [id])
+}

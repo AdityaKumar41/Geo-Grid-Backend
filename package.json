@@ -1,0 +1,32 @@
+{
+  "name": "geogridbackend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "aditya",
+  "type": "commonjs",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc-watch --onSuccess \"node build/index.js\""
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.17",
+    "tsc-watch": "^6.2.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.2",
+    "@arcjet/node": "^1.0.0-alpha.33",
+    "@prisma/client": "^6.0.1",
+    "@types/node": "^22.10.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.6",
+    "express": "^4.21.1",
+    "geogridbackend": "file:",
+    "graphql": "^16.9.0",
+    "prisma": "^6.0.1"
+  }
+}
