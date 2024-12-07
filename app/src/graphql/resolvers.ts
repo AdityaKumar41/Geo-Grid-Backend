@@ -1,6 +1,18 @@
 import { prismaClient } from "../../client";
 import nodemailer from "nodemailer";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "dotenv/config";
+
+const s3ClientInstance = new S3Client([
+  {
+    region: process.env.AWS_REGION,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  },
+]);
 
 const query = {
   VerifyAdmin: () => true,
@@ -40,6 +52,43 @@ const query = {
       },
     });
     return employee;
+  },
+  getSignedUrl: async (
+    parent: any,
+    args: { fileType: string; fileName: string },
+    context: User
+  ) => {
+    if (!context.user) {
+      throw new Error("You are not authorized to perform this action");
+    }
+    if (!args.fileName || !args.fileType) {
+      throw new Error("File name is required");
+    }
+    const { fileName, fileType } = args;
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "audio/mpeg",
+      "audio/mp3",
+    ];
+
+    if (!allowedTypes.includes(fileType)) {
+      throw new Error("Invalid file type");
+    }
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      // make sure change to folder name as per employee id
+      Key: `upload/${context.user.id}/${fileName}`,
+      ContentType: fileType,
+    });
+
+    const signedUrl = await getSignedUrl(s3ClientInstance, command, {
+      expiresIn: 60 * 5,
+    });
+
+    return signedUrl;
   },
 };
 
@@ -184,7 +233,7 @@ const mutation = {
   updateEmployee: async (
     parent: any,
     args: UpdateEmployeeInput,
-    context: User,
+    context: User
   ) => {
     const id = context.user.id;
     const admin = await prismaClient.admin.findUnique({
@@ -213,7 +262,7 @@ const mutation = {
   deleteEmployee: async (
     parent: any,
     args: DeleteEmployeeInput,
-    context: User,
+    context: User
   ) => {
     const id = context.user.id;
     const admin = await prismaClient.admin.findUnique({
