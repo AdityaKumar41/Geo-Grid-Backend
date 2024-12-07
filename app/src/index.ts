@@ -1,5 +1,5 @@
 import express from "express";
-import { ApolloServer } from "@apollo/server";
+import { ApolloServer, BaseContext } from "@apollo/server";
 import cors from "cors";
 import bodyParser from "body-parser";
 import { expressMiddleware } from "@apollo/server/express4";
@@ -10,7 +10,7 @@ const initServer = async () => {
   app.use(cors());
   app.use(bodyParser.json());
 
-  const server = new ApolloServer({
+  const server = new ApolloServer<BaseContext>({
     typeDefs: `
         ${schema.types}
         type Query {
@@ -22,7 +22,10 @@ const initServer = async () => {
     `,
     resolvers: {
       Query: {
-        VerifyAdmin: () => true,
+        ...schema.resolvers.Query,
+      },
+      Mutation: {
+        ...schema.resolvers.Mutation,
       },
     },
   });
