@@ -7,8 +7,8 @@ interface Employee {
   gender: string;
   age: number;
   phoneNo: string;
-  email: string;
   position: string;
+  email: string;
   adminId: string;
 }
 
