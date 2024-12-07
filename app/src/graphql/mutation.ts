@@ -23,22 +23,22 @@ export const mutation = `#graphql
 
   deleteEmployee(id: ID!): Employee!
 
-  createAdmin(
-    name: String!
-    email: String!
-    password: String!
-    profileImage: String
-  ): Admin!
+  # createAdmin(
+  #   name: String!
+  #   email: String!
+  #   password: String!
+  #   profileImage: String
+  # ): Admin!
 
-  updateAdmin(
-    id: ID!
-    name: String
-    email: String
-    password: String
-    profileImage: String
-  ): Admin!
+  # updateAdmin(
+  #   id: ID!
+  #   name: String
+  #   email: String
+  #   password: String
+  #   profileImage: String
+  # ): Admin!
 
-  deleteAdmin(id: ID!): Admin!
+  # deleteAdmin(id: ID!): Admin!
 
   createAttendance(
     employeeId: ID!
@@ -52,7 +52,7 @@ export const mutation = `#graphql
     status: AttendanceStatus
   ): Attendance!
 
-  deleteAttendance(id: ID!): Attendance!
+  # deleteAttendance(id: ID!): Attendance!
 
   createAttendancePair(
     employeeId: ID!
@@ -68,5 +68,5 @@ export const mutation = `#graphql
     checkOutId: ID
   ): AttendancePair!
 
-  deleteAttendancePair(id: ID!): AttendancePair!
+  # deleteAttendancePair(id: ID!): AttendancePair!
 `;

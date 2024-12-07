@@ -16,6 +16,7 @@ model Employee {
   age           Int
   phoneNo       String
   email         String
+  password      String
   position      String
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
