@@ -1,6 +1,19 @@
 import { prismaClient } from "../../client";
 import nodemailer from "nodemailer";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "dotenv/config";
+import crypto from "crypto"; // Import the crypto module
+
+const s3ClientInstance = new S3Client([
+  {
+    region: process.env.AWS_REGION,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  },
+]);
 
 const query = {
   VerifyAdmin: () => true,
@@ -41,36 +54,83 @@ const query = {
     });
     return employee;
   },
+  getSignedUrl: async (
+    parent: any,
+    args: { fileType: string; fileName: string },
+    context: User
+  ) => {
+    if (!context.user) {
+      throw new Error("You are not authorized to perform this action");
+    }
+    if (!args.fileName || !args.fileType) {
+      throw new Error("File name is required");
+    }
+    const { fileName, fileType } = args;
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "audio/mpeg",
+      "audio/mp3",
+    ];
+
+    if (!allowedTypes.includes(fileType)) {
+      throw new Error("Invalid file type");
+    }
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      // make sure change to folder name as per employee id
+      Key: `upload/${context.user.id}/${fileName}`,
+      ContentType: fileType,
+    });
+
+    const signedUrl = await getSignedUrl(s3ClientInstance, command, {
+      expiresIn: 60 * 5,
+    });
+
+    return signedUrl;
+  },
 };
 
 const mutation = {
   createEmployee: async (parent: any, args: Employee, context: User) => {
-    // const id = context.user.id;
-    // const admin = await prismaClient.admin.findUnique({
-    //   where: {
-    //     id: id,
-    //   },
-    // });
-    // if (!admin) {
-    //   throw new Error("You are not authorized to perform this action");
-    // }
+    // check admin or not
+    const id = context.user.id;
+    if (!id) {
+      throw new Error("You are not authorized to perform this action");
+    }
+    const admin = await prismaClient.admin.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!admin) {
+      throw new Error("You are not authorized to perform this action");
+    }
+
+    // Generate a unique password
+    const uniquePassword = crypto.randomBytes(8).toString("hex");
+
     const employee = await prismaClient.employee.create({
       data: {
         name: args.name,
         email: args.email,
-        password: args.password,
+        password: uniquePassword, // Use the generated password
         position: args.position,
         age: args.age,
         phoneNo: args.phoneNo,
         gender: args.gender,
         profileImage: args.profileImage,
-        admin: { connect: { id: "1" } },
+        admin: { connect: { id: context.user.id } },
       },
     });
 
     if (!employee) {
       throw new Error("Failed to create employee");
     }
+
     // nodemailer setup
 
     // Create a transporter
@@ -86,7 +146,8 @@ const mutation = {
     const mailOptions = {
       from: process.env.EMAIL, // Sender's email address
       to: employee.email, // Recipient's email address
-      subject: "Hello from Geo-Grid", // Subject line
+      subject: "Hello from NodeMailer", // Subject line
+      text: "This is a test email sent from Node.js using NodeMailer!", // Plain text body
       html: `<!DOCTYPE html>
       <html>
       <head>
@@ -155,7 +216,7 @@ const mutation = {
             <p>We are excited to welcome you to our team at Geo-Grid! Your account has been successfully created by our admin. Below are your account details:</p>
             <ul>
               <li><strong>Email:</strong> ${employee.email}</li>
-              <li><strong>Temporary Password:</strong> ${employee.password} </li>
+              <li><strong>Temporary Password:</strong> ${uniquePassword}</li>
               <li><strong>Position:</strong> ${employee.position}</li>
             </ul>
             <p>Please log in to your account and update your password as soon as possible. If you have any questions or need assistance, feel free to reach out to the HR team.</p>
@@ -184,10 +245,11 @@ const mutation = {
 
     return employee;
   },
+
   updateEmployee: async (
     parent: any,
     args: UpdateEmployeeInput,
-    context: User,
+    context: User
   ) => {
     const id = context.user.id;
     const admin = await prismaClient.admin.findUnique({
@@ -216,7 +278,7 @@ const mutation = {
   deleteEmployee: async (
     parent: any,
     args: DeleteEmployeeInput,
-    context: User,
+    context: User
   ) => {
     const id = context.user.id;
     const admin = await prismaClient.admin.findUnique({
