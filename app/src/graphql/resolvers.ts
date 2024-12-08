@@ -67,6 +67,10 @@ const mutation = {
         admin: { connect: { id: "1" } },
       },
     });
+
+    if (!employee) {
+      throw new Error("Failed to create employee");
+    }
     // nodemailer setup
 
     // Create a transporter
@@ -82,8 +86,7 @@ const mutation = {
     const mailOptions = {
       from: process.env.EMAIL, // Sender's email address
       to: employee.email, // Recipient's email address
-      subject: "Hello from NodeMailer", // Subject line
-      text: "This is a test email sent from Node.js using NodeMailer!", // Plain text body
+      subject: "Hello from Geo-Grid", // Subject line
       html: `<!DOCTYPE html>
       <html>
       <head>
@@ -152,7 +155,7 @@ const mutation = {
             <p>We are excited to welcome you to our team at Geo-Grid! Your account has been successfully created by our admin. Below are your account details:</p>
             <ul>
               <li><strong>Email:</strong> ${employee.email}</li>
-              <li><strong>Temporary Password:</strong> 123456789 </li>
+              <li><strong>Temporary Password:</strong> ${employee.password} </li>
               <li><strong>Position:</strong> ${employee.position}</li>
             </ul>
             <p>Please log in to your account and update your password as soon as possible. If you have any questions or need assistance, feel free to reach out to the HR team.</p>
