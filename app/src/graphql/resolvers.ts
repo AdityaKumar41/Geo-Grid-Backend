@@ -127,10 +127,6 @@ const mutation = {
       },
     });
 
-    if (!employee) {
-      throw new Error("Failed to create employee");
-    }
-
     // nodemailer setup
 
     // Create a transporter

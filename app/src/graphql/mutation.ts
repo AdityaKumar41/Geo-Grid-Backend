@@ -2,7 +2,6 @@ export const mutation = `#graphql
     createEmployee(
     name: String!
     profileImage: String!
-    password: String!
     gender: String!
     age: Int!
     phoneNo: String!

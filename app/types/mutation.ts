@@ -3,13 +3,11 @@ type EmployeeAttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
 interface Employee {
   name: string;
   profileImage: string;
-  password: string;
   gender: string;
   age: number;
   phoneNo: string;
   position: string;
   email: string;
-  adminId: string;
 }
 
 interface UpdateEmployeeInput {

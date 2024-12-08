@@ -12,5 +12,6 @@ export const query = `#graphql
   attendance(id: ID!): Attendance
   attendancePairs: [AttendancePair!]!
   attendancePair(id: ID!): AttendancePair
+  getSignedUrl(fileType: String!, fileName: String!): String
     
 `;
