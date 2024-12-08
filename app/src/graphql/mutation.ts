@@ -7,7 +7,6 @@ export const mutation = `#graphql
     phoneNo: String!
     email: String!
     position: String!
-    adminId: ID!
   ): Employee!
 
   updateEmployee(
@@ -16,7 +15,6 @@ export const mutation = `#graphql
     profileImage: String
     gender: String
     age: Int
-    phoneNo: String
     email: String
     position: String
   ): Employee!
@@ -67,6 +65,10 @@ export const mutation = `#graphql
     checkInId: ID
     checkOutId: ID
   ): AttendancePair!
+
+  checkIn(employeeId: ID!): AttendancePair!
+
+  checkOut(employeeId: ID!): AttendancePair!
 
   # deleteAttendancePair(id: ID!): AttendancePair!
 `;
