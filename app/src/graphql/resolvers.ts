@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "dotenv/config";
+import crypto from "crypto"; // Import the crypto module
 
 const s3ClientInstance = new S3Client([
   {
@@ -94,28 +95,38 @@ const query = {
 
 const mutation = {
   createEmployee: async (parent: any, args: Employee, context: User) => {
-    // const id = context.user.id;
-    // const admin = await prismaClient.admin.findUnique({
-    //   where: {
-    //     id: id,
-    //   },
-    // });
-    // if (!admin) {
-    //   throw new Error("You are not authorized to perform this action");
-    // }
+    // check admin or not
+    const id = context.user.id;
+    if (!id) {
+      throw new Error("You are not authorized to perform this action");
+    }
+    const admin = await prismaClient.admin.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!admin) {
+      throw new Error("You are not authorized to perform this action");
+    }
+
+    // Generate a unique password
+    const uniquePassword = crypto.randomBytes(8).toString("hex");
+
     const employee = await prismaClient.employee.create({
       data: {
         name: args.name,
         email: args.email,
-        password: args.password,
+        password: uniquePassword, // Use the generated password
         position: args.position,
         age: args.age,
         phoneNo: args.phoneNo,
         gender: args.gender,
         profileImage: args.profileImage,
-        admin: { connect: { id: "1" } },
+        admin: { connect: { id: context.user.id } },
       },
     });
+
     // nodemailer setup
 
     // Create a transporter
@@ -201,7 +212,7 @@ const mutation = {
             <p>We are excited to welcome you to our team at Geo-Grid! Your account has been successfully created by our admin. Below are your account details:</p>
             <ul>
               <li><strong>Email:</strong> ${employee.email}</li>
-              <li><strong>Temporary Password:</strong> 123456789 </li>
+              <li><strong>Temporary Password:</strong> ${uniquePassword}</li>
               <li><strong>Position:</strong> ${employee.position}</li>
             </ul>
             <p>Please log in to your account and update your password as soon as possible. If you have any questions or need assistance, feel free to reach out to the HR team.</p>
@@ -230,6 +241,7 @@ const mutation = {
 
     return employee;
   },
+
   updateEmployee: async (
     parent: any,
     args: UpdateEmployeeInput,

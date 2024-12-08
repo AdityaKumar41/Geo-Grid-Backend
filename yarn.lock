@@ -1923,6 +1923,11 @@ from@~0:
   resolved "https://registry.npmjs.org/from/-/from-0.1.7.tgz"
   integrity sha512-twe20eF1OxVxp/ML/kq2p1uc6KvFK/+vs8WjEbeKmV2He22MKm7YF2ANIt+EOqhJ5L3K/SuuPhk0hWQDjOM23g==
 
+fsevents@2.3.3:
+  version "2.3.3"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
+  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
+
 function-bind@^1.1.2:
   version "1.1.2"
   resolved "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz"
@@ -1934,6 +1939,7 @@ function-bind@^1.1.2:
   dependencies:
     "@apollo/server" "^4.11.2"
     "@arcjet/node" "^1.0.0-alpha.33"
+    "@aws-sdk/client-s3" "^3.705.0"
     "@aws-sdk/s3-request-presigner" "^3.705.0"
     "@prisma/client" "^6.0.1"
     "@types/node" "^22.10.1"
